@@ -133,14 +133,11 @@ module Rye
   # Returns: [[bits, finger-print, file-path], ...]
   #
   def keys
-    # 2048 76:cb:d7:82:90:92:ad:75:3d:68:6c:a9:21:ca:7b:7f /Users/rye/.ssh/id_rsa (RSA)
-    # 2048 7b:a6:ba:55:b1:10:1d:91:9f:73:3a:aa:0c:d4:88:0e /Users/rye/.ssh/id_dsa (DSA)
-    #keystr = Rye.shell("ssh-add", '-l')
-    #return nil unless keystr
-    #keystr.collect do |key|
-    #  key.split(/\s+/)
-    #end
-    Dir.glob(File.join(Rye.sysinfo.home, '.ssh', 'id_*sa'))
+    keystr = Rye.shell("ssh-add", '-l')
+    return nil unless keystr
+    keystr.collect do |key|
+      key.split(/\s+/)
+    end
   end
   
   def remote_host_keys(*hostnames)
