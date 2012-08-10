@@ -768,42 +768,42 @@ module Rye
     def run_command(*args, &blk)
       debug "run_command"
       
-      cmd, args = prep_args(*args)
-      
-      #p [:run_command, cmd, blk.nil?]
-      
-      connect if !@rye_ssh || @rye_ssh.closed?
-      raise Rye::NotConnected, @rye_host unless @rye_ssh && !@rye_ssh.closed?
-      
-      cmd_clean = Rye.escape(@rye_safe, cmd, args)
-      
-      # This following is the command we'll actually execute. cmd_clean
-      # can be used for logging, otherwise the output is confusing.
-      cmd_internal = prepend_env(cmd_clean)
-      
-      # Add the current working directory before the command if supplied. 
-      # The command will otherwise run in the user's home directory.
-      if @rye_current_working_directory
-        cwd = Rye.escape(@rye_safe, 'cd', @rye_current_working_directory)
-        cmd_internal = '(%s; %s)' % [cwd, cmd_internal]
-      end
-      
-      # ditto (same explanation as cwd)
-      if @rye_current_umask
-        cwd = Rye.escape(@rye_safe, 'umask', @rye_current_umask)
-        cmd_internal = [cwd, cmd_internal].join(' && ')
-      end
-      
-      ## NOTE: Do not raise a CommandNotFound exception in this method.
-      # We want it to be possible to define methods to a single instance
-      # of Rye::Box. i.e. def rbox.rm()...
-      # can? returns the methods in Rye::Cmd so it would incorrectly
-      # return false. We could use self.respond_to? but it's possible
-      # to get a name collision. I could write a work around but I think
-      # this is good enough for now. 
-      ## raise Rye::CommandNotFound unless self.can?(cmd)
-      
       begin
+        cmd, args = prep_args(*args)
+        
+        #p [:run_command, cmd, blk.nil?]
+        
+        connect if !@rye_ssh || @rye_ssh.closed?
+        raise Rye::NotConnected, @rye_host unless @rye_ssh && !@rye_ssh.closed?
+        
+        cmd_clean = Rye.escape(@rye_safe, cmd, args)
+        
+        # This following is the command we'll actually execute. cmd_clean
+        # can be used for logging, otherwise the output is confusing.
+        cmd_internal = prepend_env(cmd_clean)
+        
+        # Add the current working directory before the command if supplied. 
+        # The command will otherwise run in the user's home directory.
+        if @rye_current_working_directory
+          cwd = Rye.escape(@rye_safe, 'cd', @rye_current_working_directory)
+          cmd_internal = '(%s; %s)' % [cwd, cmd_internal]
+        end
+        
+        # ditto (same explanation as cwd)
+        if @rye_current_umask
+          cwd = Rye.escape(@rye_safe, 'umask', @rye_current_umask)
+          cmd_internal = [cwd, cmd_internal].join(' && ')
+        end
+        
+        ## NOTE: Do not raise a CommandNotFound exception in this method.
+        # We want it to be possible to define methods to a single instance
+        # of Rye::Box. i.e. def rbox.rm()...
+        # can? returns the methods in Rye::Cmd so it would incorrectly
+        # return false. We could use self.respond_to? but it's possible
+        # to get a name collision. I could write a work around but I think
+        # this is good enough for now. 
+        ## raise Rye::CommandNotFound unless self.can?(cmd)
+        
         debug "COMMAND: #{cmd_internal}"
 
         if !@rye_quiet && @rye_pre_command_hook.is_a?(Proc)
